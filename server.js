@@ -3,8 +3,6 @@ const cors = require('cors');
 const fs = require('fs-extra');
 const path = require('path');
 const multer = require('multer');
-const { marked } = require('marked');
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -120,6 +118,16 @@ function getDocType(filename) {
   return map[ext] || 'text';
 }
 
+// ============ Validation helpers ============
+function validateUrl(url) {
+  if (!url) return true; // optional
+  try { new URL(url); return true; } catch { return false; }
+}
+function validateHex(hex) {
+  if (!hex) return true;
+  return /^#[0-9a-fA-F]{3,8}$/.test(hex);
+}
+
 // ============ REFERENCES ============
 app.get('/api/references', (req, res) => {
   let refs = loadJSON('references.json');
@@ -154,6 +162,10 @@ app.get('/api/references/styles', (req, res) => {
 });
 
 app.post('/api/references', (req, res) => {
+  try {
+  if (!req.body.title || !req.body.title.trim()) return res.status(400).json({ error: 'Title is required' });
+  if (req.body.url && !validateUrl(req.body.url)) return res.status(400).json({ error: 'Invalid URL' });
+  if (req.body.imageUrl && !validateUrl(req.body.imageUrl)) return res.status(400).json({ error: 'Invalid image URL' });
   const refs = loadJSON('references.json');
   const ref = {
     id: genId(),
@@ -174,6 +186,7 @@ app.post('/api/references', (req, res) => {
   refs.push(ref);
   saveJSON('references.json', refs);
   res.json(ref);
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 app.put('/api/references/:id', (req, res) => {
@@ -208,7 +221,7 @@ app.put('/api/design-system', (req, res) => {
 });
 
 app.post('/api/design-system/extract', (req, res) => {
-  // Placeholder — extraction would use Figma API with stored token
+  // Notes-only endpoint — actual Figma extraction happens via the AI agent using MCP
   const { figmaUrl, notes } = req.body;
   const ds = loadJSON('design-system.json', {
     colors: [], typography: [], spacing: { base: 8, scale: [] },
@@ -222,7 +235,7 @@ app.post('/api/design-system/extract', (req, res) => {
     ds.extractedAt = new Date().toISOString();
   }
   saveJSON('design-system.json', ds);
-  res.json({ message: 'Design system updated. Use Figma MCP for full extraction.', designSystem: ds });
+  res.json({ message: 'Notes saved. Ask the AI in chat to extract your full design system via Figma MCP.', designSystem: ds });
 });
 
 // ============ KNOWLEDGE BASE (RAG) ============
@@ -242,6 +255,12 @@ app.get('/api/documents/:id', (req, res) => {
 app.post('/api/documents', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    const allowedExts = ['.pdf','.md','.txt','.html','.htm'];
+    const ext = path.extname(req.file.originalname).toLowerCase();
+    if (!allowedExts.includes(ext)) {
+      fs.removeSync(req.file.path);
+      return res.status(400).json({ error: 'Unsupported file type. Allowed: PDF, MD, TXT, HTML' });
+    }
     const text = await extractText(req.file.path, req.file.mimetype, req.file.originalname);
     const chunks = chunkText(text);
     const docId = genId();
@@ -307,6 +326,8 @@ app.get('/api/reviews', (req, res) => {
 });
 
 app.post('/api/reviews', (req, res) => {
+  try {
+  if (!req.body.title || !req.body.title.trim()) return res.status(400).json({ error: 'Title is required' });
   const reviews = loadJSON('reviews.json');
   const review = {
     id: genId(),
@@ -321,6 +342,7 @@ app.post('/api/reviews', (req, res) => {
   reviews.push(review);
   saveJSON('reviews.json', reviews);
   res.json(review);
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 app.put('/api/reviews/:id', (req, res) => {
@@ -349,6 +371,8 @@ app.get('/api/projects', (req, res) => {
 });
 
 app.post('/api/projects', (req, res) => {
+  try {
+  if (!req.body.name || !req.body.name.trim()) return res.status(400).json({ error: 'Name is required' });
   const projects = loadJSON('projects.json');
   const project = {
     id: genId(),
@@ -365,6 +389,7 @@ app.post('/api/projects', (req, res) => {
   projects.push(project);
   saveJSON('projects.json', projects);
   res.json(project);
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 app.put('/api/projects/:id', (req, res) => {

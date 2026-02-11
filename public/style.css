@@ -221,6 +221,36 @@ input.full, textarea.full, select.full { width: 100%; }
 .moodboard-card { border-radius: var(--radius); overflow: hidden; }
 .moodboard-card .ref-preview { height: 240px; }
 
+/* ============ LOADING STATE ============ */
+.loading-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+.loading-state p { margin-top: 12px; font-size: 13px; }
+.spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============ WELCOME WIZARD ============ */
+.welcome-wizard { max-width: 640px; margin: 0 auto; padding-top: 20px; }
+.welcome-header { text-align: center; margin-bottom: 36px; }
+.welcome-icon { margin-bottom: 16px; color: var(--accent); }
+.welcome-icon svg { width: 48px; height: 48px; }
+.wizard-steps { display: flex; flex-direction: column; gap: 20px; }
+.wizard-step { display: flex; gap: 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; transition: border-color 0.2s; }
+.wizard-step:hover { border-color: var(--border-light); }
+.wizard-step-num { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-dim); color: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+.wizard-step-content { flex: 1; }
+.wizard-step-content h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.wizard-step-content p { font-size: 13px; color: var(--text-muted); }
+.wizard-optional { font-size: 11px; color: var(--text-dim); font-weight: 400; }
+
+/* ============ REFERENCE IMAGE PREVIEW ============ */
+.ref-preview-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ref-preview-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+
+/* ============ COMING SOON BADGE ============ */
+.coming-soon-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(249,115,22,.15); color: var(--orange); border: 1px solid rgba(249,115,22,.25); margin-bottom: 12px; }
+
+/* ============ COLOR PREVIEW ============ */
+.color-preview-swatch { width: 36px; height: 36px; border-radius: var(--radius-sm); border: 2px solid var(--border); flex-shrink: 0; }
+
 /* ============ RESPONSIVE ============ */
 @media (max-width: 900px) {
   .sidebar { width: 60px; }

@@ -206,3 +206,61 @@ That's **5+ steps with zero guidance**. Most users will bounce after seeing all 
 | **Overall** | **4.5/10** | |
 
 **The #1 problem is the empty first-run screen.** A new user opens this and sees five zeros with no guidance. The AI's onboarding happens in chat but the dashboard doesn't reflect it. Fix the first-run experience and this product's perceived quality jumps from "broken" to "polished" overnight.
+
+---
+
+## Fixes Applied
+
+**Date:** 2026-02-11
+
+### 🔴 Critical Fixes
+
+1. **✅ First-run welcome wizard added.** Dashboard detects empty state (all counts = 0 and `onboardingDone` not set in config). Shows a 3-step guided wizard: connect Figma token, save first reference, or load sample data. Wizard state persists via `config.onboardingDone` flag. Sample data loader creates 5 references (with real Unsplash image URLs), a full design system (6 colors, 4 type styles, 3 components, 5 principles), and a sample project.
+
+2. **✅ Loading and error states added everywhere.** Every render function now shows a spinner during fetch and an error state with retry button on failure. `showLoading()` and `showError()` helpers added. CSS includes `.loading-state`, `.spinner` with animation.
+
+3. **✅ Reference images now render.** `refCard()` and `renderRefDetail()` now display actual `<img>` tags from `imageUrl` with `onerror` fallback to the gradient. New CSS classes `.ref-preview-img` and `.ref-preview-fallback` handle layout.
+
+4. **✅ Client-side error handling added.** `api()` now checks `res.ok` and throws on non-2xx responses. Every `save*`, `update*`, `delete*`, and `upload*` function wrapped in try/catch with error toasts. Form validation added (required title/name fields).
+
+### 🟡 Important Fixes
+
+5. **✅ BOOTSTRAP.md compressed to 3 questions.** Reduced from 8 questions to 3 (product, reference, style). Removed interview-style format. Added note that additional context is asked contextually.
+
+6. **✅ Edit Review modal pre-populates values.** `openEditReview()` now fetches the review by ID from the API and pre-populates title, status (with correct `selected` attribute), score, and Figma URL. No longer reads from stale `state.reviews`.
+
+7. **✅ Edit Project modal pre-populates values.** `openEditProject()` now fetches the project by ID and pre-populates name, description, status, Figma URL, and notes. All fields editable (was previously only status + notes).
+
+8. **✅ Figma extraction clearly marked as "Coming Soon".** Modal now shows a `.coming-soon-badge`, explains that extraction requires the AI agent via MCP, and button relabeled to "Save Notes" with appropriate toast message. Server comment updated.
+
+9. **✅ `state.reviews` and `state.projects` now populated.** `renderReviews()`, `renderReviewDetail()`, `renderProjects()`, `renderProjectDetail()` all update `state.reviews`/`state.projects` after fetching.
+
+10. **✅ BOOTSTRAP.md connected to UI onboarding.** Welcome wizard step 1 saves Figma token to config (same as Settings page). Step 2 saves a reference. Config stores `onboardingDone` flag to prevent re-showing wizard.
+
+### 🟢 Additional Fixes
+
+11. **✅ Filter pills show all categories.** Added "+N more" pill that expands to show all 14 categories, with "Show less" to collapse.
+
+12. **✅ Toast stacking fixed.** Only one toast visible at a time — previous toast removed before showing new one.
+
+13. **✅ Moodboard empty state improved.** When no liked references exist in moodboard view, shows clear message with button to switch to gallery view instead of confusing empty space.
+
+14. **✅ Search-as-you-type with debounce.** References search now triggers after 300ms of inactivity (debounced), no longer requires Enter key.
+
+15. **✅ Removed unused `marked` dependency.** Removed from both `server.js` import and `package.json`.
+
+16. **✅ Server-side input validation added.** Required field validation for references (title), reviews (title), projects (name). URL validation helper. Hex color validation in client-side color modals. File upload type validation (only PDF/MD/TXT/HTML allowed).
+
+17. **✅ Color preview swatch in Add/Edit Color modals.** Live-updating color preview next to hex input field.
+
+18. **✅ Modal focus management.** First input in modal auto-focused on open.
+
+19. **✅ Knowledge base search shows loading spinner.** Search results area shows spinner during fetch.
+
+### Not Fixed (Out of Scope / Requires Architecture Changes)
+
+- **Splitting app.js into modules** — Would require build tooling setup (bundler/ESM). Deferred.
+- **SQLite/file locking** — Requires architecture change. JSON files adequate for single-user use.
+- **Rate limiting / auth** — Security hardening for multi-user deployment. Out of scope for single-user AI employee.
+- **ARIA labels / full accessibility** — Incremental improvement, not blocking.
+- **Pagination / virtual scroll** — Performance optimization for large datasets. Deferred.
